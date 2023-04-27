@@ -1,8 +1,10 @@
 <script lang="ts" setup>
 import { Snapshot } from '@phoobynet/alpaca-services'
 import { useSnapshotView } from '@/composables/useSnapshotView'
-import { watch } from 'vue'
+import { onMounted, watch } from 'vue'
 import { useBars } from '@/composables/useBars'
+import RelativeChangeGraph from '@/components/RelativeChangeGraph.vue'
+import { subBusinessDays, subMonths } from 'date-fns'
 
 const props = defineProps<{ snapshot: Snapshot }>()
 
@@ -11,6 +13,7 @@ const {
   price,
   cleanAssetName,
   assetSymbol,
+  rawPrice,
   pctChange,
   priceChange,
   up,
@@ -20,6 +23,12 @@ const {
 const { fetch: fetchBars, bars } = useBars()
 
 watch(() => props.snapshot, applySnapshot)
+
+onMounted(async () => {
+  const start = subMonths(new Date(), 6)
+  const end = subBusinessDays(new Date(), 1)
+  await fetchBars(props.snapshot.symbol, start, end, '1Day')
+})
 </script>
 
 <template>
@@ -41,7 +50,9 @@ watch(() => props.snapshot, applySnapshot)
         </div>
       </div>
     </div>
-    <div class="graph">TODO: Graph</div>
+    <div class="graph">
+      <RelativeChangeGraph :price="rawPrice" :bars="bars" />
+    </div>
   </div>
 </template>
 

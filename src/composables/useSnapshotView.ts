@@ -20,6 +20,8 @@ export const useSnapshotView = () => {
     asset.value = await getAsset(newSnapshot.symbol)
   }
 
+  const rawPrice = computed<number>(() => snapshot.value?.latestTrade.p ?? 0)
+
   const price = computed<string>(() =>
     money.format(snapshot.value?.latestTrade.p ?? 0),
   )
@@ -67,6 +69,7 @@ export const useSnapshotView = () => {
 
   return {
     applySnapshot,
+    rawPrice,
     price,
     assetName,
     cleanAssetName,
