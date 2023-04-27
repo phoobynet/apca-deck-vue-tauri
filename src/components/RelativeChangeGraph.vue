@@ -1,4 +1,4 @@
-<script lang="ts" setup>
+<script lang='ts' setup>
 import { Bar } from '@phoobynet/alpaca-services'
 import { computed, onMounted, ref, watch } from 'vue'
 import { numberDiff } from '@/lib/numberDiff'
@@ -8,11 +8,14 @@ import Konva from 'konva'
 
 const props = defineProps<{ bars: Bar[]; price: number }>()
 const container = ref<HTMLDivElement>()
-const canvas = ref<HTMLCanvasElement>()
 const high = ref<number>()
 const low = ref<number>()
 
 const { width, height } = useElementSize(container)
+
+const centerLineY = computed(() => height.value / 2)
+
+const changeWidth = computed(() => width.value / props.bars.length)
 
 type Change = {
   pct: number
@@ -61,18 +64,52 @@ watch([width, height], newValues => {
   render()
 })
 
+const drawCenterLine = () => {
+  return new Konva.Line({
+    points: [0, centerLineY.value, width.value, centerLineY.value],
+    stroke: 'rgba(255,255,255,0.06)',
+    strokeWidth: 1,
+  })
+}
+
+const drawChangeLine = (change: Change, i: number) => {
+  // set the thickness of the line
+
+  // Start
+  // calculate the x
+  const x1 = i * changeWidth.value
+  // start y is the starting position around the center line
+  const y1 = centerLineY.value
+
+  // End
+  const x2 = 0
+  const y2 = centerLineY.value - 20
+
+
+  /**                           */
+  /** ------------|------------ */
+
+  let stroke = 'white'
+  if (change.pct > 0) {
+    const y2 = change.pct / (height.value / 2)
+    stroke = 'green'
+  } else if (change.pct < 0) {
+    stroke = 'red'
+  }
+
+  return new Konva.Line({
+    points: [x1, y1, x2, y2],
+    stroke: stroke,
+    strokeWidth: changeWidth.value,
+  })
+}
+
 const render = () => {
   layer.destroyChildren()
 
-  const rect = new Konva.Rect({
-    x: 0,
-    y: 0,
-    width: 10,
-    height: 20,
-    fill: '#fff',
-  })
-
-  layer.add(rect)
+  // draw a center line representing the current price
+  layer.add(drawCenterLine())
+  layer.add(drawChangeLine(changes.value[0], 0))
 
   stage.draw()
 }
@@ -92,7 +129,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div ref="container" id="container" class="w-full h-[10rem]"></div>
+  <div ref='container' id='container' class='w-full h-[10rem]'></div>
 </template>
 
-<style lang="scss" scoped></style>
+<style lang='scss' scoped></style>
