@@ -28,7 +28,9 @@ onBeforeUnmount(() => {
     <div>
       <AssetAutoComplete @select="onAssetSelected" />
     </div>
-    <div class="grid grid-cols-4 mt-4 gap-2">
+    <div
+      class="grid lg:grid-cols-2 xl:grid-cols-3 xxl:grid-cols-4 md:grid-cols-2 mt-4 gap-2"
+    >
       <AssetMicroView
         v-for="symbol in trackedSymbols"
         :key="symbol"
